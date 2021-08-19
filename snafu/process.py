@@ -52,6 +52,9 @@ class LiveProcess:
     timeout : int, optional
         When cleaning up the running process, this value specifies time in seconds to wait for
         process to finish before killing it.
+    live_capture : bool, optional
+        If True, will spin up Threads to capture output pipes and store in an in-memory queues. Defaults to
+        True.
     **kwargs
         Additional kwargs given will be passed directly to the :py:class:`subprocess.Popen` call used in the
         background to launch the command.
@@ -64,6 +67,12 @@ class LiveProcess:
         Timeout value in seconds, if given
     kwargs : mapping
         kwargs to pass to :py:class:subprocess.Popen`
+    live_capture : bool
+        True if live_capture is enabled, False otherwise.
+    stdout : queue.Queue or None
+        Live stdout captured from the process, or None if live_capture is False.
+    stderr : queue.Queue or None
+        Live stderr captured from the process, or None if live_capture is False.
     attempt : ProcessRun
         ProcessRun instance describing the run process
     process : subprocess.Popen
@@ -87,13 +96,16 @@ class LiveProcess:
     'test\ntest2\n'
     """
 
-    def __init__(self, cmd: Union[str, List[str]], timeout: Optional[int] = None, **kwargs):
+    def __init__(
+        self, cmd: Union[str, List[str]], timeout: Optional[int] = None, live_capture: bool = True, **kwargs
+    ):
         """Create instance attributes with None for defaults as needed and check pipe arguments in kwargs."""
         self.cmd: Union[str, List[str]] = cmd
         self.timeout: Optional[int] = timeout
         self.kwargs: Mapping[str, Any] = kwargs
-        self.stdout: queue.Queue = queue.Queue()
-        self.stderr: queue.Queue = queue.Queue()
+        self.live_capture: bool = live_capture
+        self.stdout: queue.Queue = queue.Queue() if live_capture else None
+        self.stderr: queue.Queue = queue.Queue() if live_capture else None
         self.attempt: Optional[ProcessRun] = ProcessRun()
         self.process: Optional[subprocess.Popen] = None
         self.start_time: Optional[datetime.datetime] = None
@@ -128,21 +140,22 @@ class LiveProcess:
 
         self.start_time = datetime.datetime.utcnow()
         self.process = subprocess.Popen(self.cmd, **self.kwargs)  # pylint: disable=R1732
-        self._threads = [
-            threading.Thread(
-                target=self._enqueue_line_from_fh,
-                args=(self.process.stdout, self.stdout, "_stdout"),
-                daemon=True,
-            ),
-            threading.Thread(
-                target=self._enqueue_line_from_fh,
-                args=(self.process.stderr, self.stderr, "_stderr"),
-                daemon=True,
-            ),
-        ]
+        if self.live_capture:
+            self._threads = [
+                threading.Thread(
+                    target=self._enqueue_line_from_fh,
+                    args=(self.process.stdout, self.stdout, "_stdout"),
+                    daemon=True,
+                ),
+                threading.Thread(
+                    target=self._enqueue_line_from_fh,
+                    args=(self.process.stderr, self.stderr, "_stderr"),
+                    daemon=True,
+                ),
+            ]
 
-        for thread in self._threads:
-            thread.start()
+            for thread in self._threads:
+                thread.start()
 
     def __enter__(self):
         """Call start method and return self."""
@@ -164,12 +177,16 @@ class LiveProcess:
                 self.process.wait()
 
             self.end_time = datetime.datetime.utcnow()
-            for thread in self._threads:
-                thread.join()
+            if self._threads is None:
+                self.attempt.stdout = self.process.stdout.read().decode("utf-8")
+                self.attempt.stderr = self.process.stderr.read().decode("utf-8")
+            else:
+                for thread in self._threads:
+                    thread.join()
+                self.attempt.stdout = self._stdout.decode("utf-8")
+                self.attempt.stderr = self._stderr.decode("utf-8")
 
             self._cleaned = True
-            self.attempt.stdout = self._stdout.decode("utf-8")
-            self.attempt.stderr = self._stderr.decode("utf-8")
             self.attempt.rc = self.process.returncode
             self.attempt.time_seconds = (self.end_time - self.start_time).total_seconds()
 
@@ -227,7 +244,7 @@ def get_process_sample(
         tries += 1
         logger.debug(f"On try {tries}")
 
-        with LiveProcess(cmd, timeout=timeout, **kwargs) as proc:
+        with LiveProcess(cmd, timeout=timeout, live_capture=False, **kwargs) as proc:
             proc.cleanup()
             attempt: ProcessRun = proc.attempt
 
