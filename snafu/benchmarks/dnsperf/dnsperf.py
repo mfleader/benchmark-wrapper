@@ -255,13 +255,18 @@ class Dnsperf(Benchmark):
                 sample.successful.stdout, load_limit
             )
 
-            rtt_sample: DnsRttSample
-            for rtt_sample in rtt_samples:
-                yield self.create_new_result(data=dict(rtt_sample), config=dict(metadata), tag="rtt")
+            self.logger.info(f"runtime (s)           : {metadata.runtime_length}")
+            self.logger.info(f"throughput mean (qps) : {metadata.throughput_mean}")
+            self.logger.info(f"client threads        : {metadata.client_threads}")
+            yield self.create_new_result(data=dict(), config=dict(metadata), tag="results")
 
-            throughput: ThroughputSample
-            for throughput in throughput_ts:
-                yield self.create_new_result(data=dict(throughput), config=dict(metadata), tag="throughput")
+            # rtt_sample: DnsRttSample
+            # for rtt_sample in rtt_samples:
+            #     yield self.create_new_result(data=dict(rtt_sample), config=dict(metadata), tag="rtt")
+            #
+            # throughput: ThroughputSample
+            # for throughput in throughput_ts:
+            #     yield self.create_new_result(data=dict(throughput), config=dict(metadata), tag="throughput")
 
             self.logger.info(f"ran succesfully!\n")
 

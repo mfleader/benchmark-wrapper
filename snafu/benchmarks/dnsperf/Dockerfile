@@ -15,3 +15,6 @@ RUN dnf -y install --nodocs \
 
 COPY . /opt/snafu
 RUN python -m pip install --editable /opt/snafu
+
+RUN dnf -y install sysstat
+WORKDIR /opt/snafu
