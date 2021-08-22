@@ -126,7 +126,7 @@ class Dnsperf(Benchmark):
     """
 
     tool_name = "dnsperf"
-    with Path(__file__).with_name("dnsperf-template.xml").open() as template_f:
+    with Path(__file__).with_name("dnsperf-short-template.xml").open() as template_f:
         output_template = template_f.read()
 
     args = (
@@ -287,6 +287,8 @@ class Dnsperf(Benchmark):
         metadata.set_load_mean()
         return (
             metadata,
-            tuple(DnsRttSample(**item) for item in result["data"] if "throughput" not in item),
-            tuple(ThroughputSample(**item) for item in result["data"] if "throughput" in item),
+            # tuple(DnsRttSample(**item) for item in result["data"] if "throughput" not in item),
+            # tuple(ThroughputSample(**item) for item in result["data"] if "throughput" in item),
+            None,
+            None,
         )
