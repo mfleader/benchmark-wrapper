@@ -9,6 +9,8 @@ import subprocess
 import threading
 from typing import Any, Iterable, List, Mapping, Optional, Union
 
+# from time import sleep
+
 
 @dataclasses.dataclass
 class ProcessRun:
@@ -174,16 +176,18 @@ class LiveProcess:
                     self.process.kill()
                     self.process.wait()
             else:
-                # self.process.wait()
-                stdout_data, stderr_data = self.process.communicate()
-                self.process.poll()
+                # sleep(120)
+                self.process.wait()
+                # sleep(120)
+                # stdout_data, stderr_data = self.process.communicate()
+                # self.process.poll()
 
             self.end_time = datetime.datetime.utcnow()
             if self._threads is None:
-                # self.attempt.stdout = self.process.stdout.read().decode("utf-8")
-                # self.attempt.stderr = self.process.stderr.read().decode("utf-8")
-                self.attempt.stdout = stdout_data.decode("utf-8")
-                self.attempt.stderr = stderr_data.decode("utf-8")
+                self.attempt.stdout = self.process.stdout.read().decode("utf-8")
+                self.attempt.stderr = self.process.stderr.read().decode("utf-8")
+                # self.attempt.stdout = stdout_data.decode("utf-8")
+                # self.attempt.stderr = stderr_data.decode("utf-8")
             else:
                 for thread in self._threads:
                     thread.join()
