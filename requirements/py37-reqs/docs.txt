@@ -24,11 +24,11 @@ backports.zoneinfo==0.2.1
     #   tzlocal
 bleach==4.1.0
     # via nbconvert
-boto3==1.18.44
+boto3==1.18.48
     # via
     #   -r requirements/py37-reqs/install.txt
     #   snafu (setup.cfg)
-botocore==1.21.44
+botocore==1.21.48
     # via
     #   -r requirements/py37-reqs/install.txt
     #   boto3
@@ -75,12 +75,11 @@ dictdiffer==0.9.0
     # via
     #   -r requirements/py37-reqs/install.txt
     #   openshift
-docutils==0.16
+docutils==0.17.1
     # via
     #   -r requirements/py37-reqs/install.txt
     #   myst-parser
     #   nbsphinx
-    #   snafu (setup.cfg)
     #   sphinx
     #   sphinx-rtd-theme
     #   statistics
@@ -117,7 +116,7 @@ ipykernel==6.4.1
     # via
     #   notebook
     #   snafu (setup.cfg)
-ipython==7.27.0
+ipython==7.28.0
     # via
     #   ipykernel
     #   snafu (setup.cfg)
@@ -186,7 +185,7 @@ myst-parser==0.15.2
     # via snafu (setup.cfg)
 nbclient==0.5.4
     # via nbconvert
-nbconvert==6.1.0
+nbconvert==6.2.0
     # via
     #   nbsphinx
     #   notebook
@@ -266,6 +265,10 @@ pyasn1-modules==0.2.8
     #   google-auth
 pycparser==2.20
     # via cffi
+pydantic==1.8.2
+    # via
+    #   -r requirements/py37-reqs/install.txt
+    #   snafu (setup.cfg)
 pygments==2.10.0
     # via
     #   ipython
@@ -311,7 +314,7 @@ redis==3.5.3
     # via
     #   -r requirements/py37-reqs/install.txt
     #   snafu (setup.cfg)
-regex==2021.8.28
+regex==2021.9.24
     # via
     #   -r requirements/py37-reqs/install.txt
     #   dateparser
@@ -387,6 +390,10 @@ terminado==0.12.1
     # via notebook
 testpath==0.5.0
     # via nbconvert
+toolz==0.11.1
+    # via
+    #   -r requirements/py37-reqs/install.txt
+    #   snafu (setup.cfg)
 tornado==6.1
     # via
     #   ipykernel
@@ -414,11 +421,12 @@ typing-extensions==3.10.0.2
     #   -r requirements/py37-reqs/install.txt
     #   importlib-metadata
     #   markdown-it-py
+    #   pydantic
 tzlocal==3.0
     # via
     #   -r requirements/py37-reqs/install.txt
     #   dateparser
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -r requirements/py37-reqs/install.txt
     #   botocore
